@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!--   Call this script to enable A-Frame   -->
+  <!--   Future through Memory AFrame Blank Code  -->
+
+  <script src="https://aframe.io/releases/0.6.0/aframe.min.js"></script>
+  <script src="https://unpkg.com/aframe-pointcloud-component/dist/aframe-pointcloud-component.min.js"></script>
+  <script src="js/aframe-tooltip-component.js"></script>
+  <script src="js/link-controls.js"></script>
+
+</head>
+
+<script>
+  // script from https://jsfiddle.net/Lwtzjnk9/1/ to animate pngs - adapted for jpgs
+      AFRAME.registerComponent("animate-jpg", {
+        init: function() {
+          // load the .jpgs
+          let loader = new THREE.TextureLoader()
+          this.jpgArray = []
+          this.jpgArray.push(loader.load('assets/canton-guide/step-01.jpg'))
+          this.jpgArray.push(loader.load('assets/canton-guide/step-02.jpg'))
+          this.jpgArray.push(loader.load('assets/canton-guide/step-03.jpg'))
+          this.jpgArray.push(loader.load('assets/canton-guide/step-04.jpg'))
+
+          this.el.addEventListener('loaded', e => {
+            let mesh = this.el.getObject3D("mesh")
+            this.material = mesh.material
+
+            var i = 0
+            this.id = setInterval(e => {
+              if (i >= this.jpgArray.length) i = 0;
+              this.material.map = this.jpgArray[i++]
+              this.material.needsUpdate = true
+            }, 3000)
+          })
+        },
+        remove: function() {
+          clearInterval(this.id);
+          // free the memory
+          for (let i = 0; i < this.jpgArray.length; i++) {
+            this.jpgArray[i].dispose();
+          }
+        }
+      })
+
+</script>
+
+<body>
+  <!--   Place <a-scene> and <a-assets> inside your <body>   -->
+  <a-scene>
+    <a-assets>
+
+      <!-- Images for sky and ground entity -->
+      <img crossorigin="anonymous" id="groundTexture" src="https://cdn.aframe.io/a-painter/images/floor.jpg">
+      <img crossorigin="anonymous" id="skyTexture" src="https://cdn.aframe.io/a-painter/images/sky.jpg">
+
+      <!-- Add your 2D Images Here -->
+      <!--img id="blankIMG" src="assets/blankimage.jpg"-->
+      <img id="back-wall" src="assets/restaurant-images/01_back-wall.jpg">
+      <img id="left-wall" src="assets/restaurant-images/02_left-wall.jpg">
+      <img id="right-wall" src="assets/restaurant-images/03_right-wall.jpg">
+
+      <!-- Add Your OBJ, MTL and PLY Files Here -->
+      <a-asset-item id="pointcloud-canton" src="assets/canton.ply"></a-asset-item>
+      <!--a-asset-item id="OBJName" src="assets/assetname.obj"></a-asset-item-->
+      <!--a-asset-item id="MTLName" src="assets/assetname.mtl"></a-asset-item-->
+
+      <!-- Add Your Audio Files, Keep "Steps" File -->
+      <audio id="spadina-ambience" src="assets/spadina-ambience.mp3"></audio>
+
+    </a-assets>
+
+    <a-pointcloud position="-0.202 -0.032 -2.369" rotation="0.6302535746439055 -85.08423257692725 2.521014298575622" src="#pointcloud-canton" size="0.5" opacity="1" depthwrite="false" pointcloud="size:0.02;depthWrite:true" scale="9 9 9"></a-pointcloud>
+
+    <a-image src="#back-wall" position="-0.021 8.448 -19.354" scale="7.8 7.8 7.8" material="opacity:0.75"></a-image>
+    <a-image src="#left-wall" position="-6.93 8.342 -12.96" rotation="0 90.01166961505233 0" scale="7.908 7.908 7.908" material="opacity:0.75"></a-image>
+    <a-image src="#right-wall" position="4.888 8.165 -10.399" rotation="0 -90.01166961505233 0" scale="7.98 7.98 7.98" material="opacity:0.75"></a-image>
+
+    <a-box position="7.257 4.613 1.633" rotation="0 45 0" scale="4 4 4" animate-jpg></a-box>
+
+    <a-sound src="#spadina-ambience" autoplay="true" loop="true"></a-sound>
+
+    <!-- Additional Matrial - Do Not Touch -->
+    <a-entity id="stepsEnt" sound="src: assets/steps.mp3; volume: 3; loop: true; poolSize: 1;" ></a-entity>
+    <a-plane src="#groundTexture" rotation="-90 0 0" height="100" width="100"></a-plane>
+    <a-light type="ambient" color="#445451" light="groundColor: #2b2727; intensity: 0.5; penumbra: 0.58; castShadows: false" visible="" rotation="" position="0.07 0 0" scale=""></a-light>
+    <a-light type="point" intensity="1" position="2 4 4"></a-light>
+    <a-sky height="2048" radius="30" src="#skyTexture" theta-length="90" width="2048"></a-sky>
+    <a-entity camera="" position="1.844 3.786 8.897" wasd-controls="" rotation="-2.636 6.646 0" look-controls="" aframe-injected="" data-aframe-inspector-original-camera=""></a-entity>
+  </a-scene>
+</body>
+
+<script>
+  //walking steps
+  document.addEventListener("DOMContentLoaded", function(event){
+    var cameraEl = document.querySelector("#camera");
+    var walking = document.querySelector('#stepsEnt');
+
+    function walkingSound() {
+      walking.components.sound.playSound();
+      console.log('walk');
+    }
+
+    function walkingSoundStop() {
+      walking.components.sound.pauseSound();
+      console.log('stop');
+    }
+
+    document.addEventListener("keydown", function(evt) {
+        // check if keys pressed are W, A, S, D and Up, Down, Left, Right
+        if (evt.keyCode == 87 || evt.keyCode == 65 || evt.keyCode == 83 || evt.keyCode == 68 || evt.keyCode == 38 || evt.keyCode == 37 || evt.keyCode == 39 || evt.keyCode == 40)
+        {
+          walkingSound();
+        }
+    });
+    document.addEventListener("keyup", function(evt) {
+        // check if keys pressed are W, A, S, D and Up, Down, Left, Right
+        if (evt.keyCode == 87 || evt.keyCode == 65 || evt.keyCode == 83 || evt.keyCode == 68 || evt.keyCode == 38 || evt.keyCode == 37 || evt.keyCode == 39 || evt.keyCode == 40)
+        {
+          walkingSoundStop();
+        }
+    });
+});
+</script>
+</html>
